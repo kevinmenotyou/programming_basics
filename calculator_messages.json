@@ -1,0 +1,26 @@
+{ 
+  "English" : { 
+    "ChooseLanguage" : "Choose a language: EN / FR",
+    "LanguageError" : "Choose either EN or FR.",
+    "WelcomeMessage" : "Welcome to Calculator!",
+    "FirstNumberPrompt" : "What's the first number?",
+    "SecondNumberPrompt" : "What's the second number?",
+    "InvalidNumberError" : "Hmm... that doesn't look like a valid number.",
+    "OperationPrompt" : "What operation would you like to perform?\n1) Add 2) Subtract 3) Multiply 4) Divide",
+    "InvalidOperatorError" : "Must choose 1, 2, 3 or 4",
+    "TryAgainPrompt" : "Would you like to try again? Y/N",
+    "Result" : "The result is: "
+  },
+  "French" : {
+    "ChooseLanguage" : "Choisissez une langue: EN / FR",
+    "LanguageError" : "Choisissez entre EN et FR.",
+    "WelcomeMessage" : "Bienvenue a Calculatrice!",
+    "FirstNumberPrompt" : "Quel est le premier numero?",
+    "SecondNumberPrompt" : "Quel est le deuxieme numero?",
+    "InvalidNumberError" : "Ca na pas l'aire d'etre un numero valide.",
+    "OperationPrompt" : "Quelle operation aimerez-vous utiliser?\n1) Addition 2) Sustraction 3) Multiplication 4) Division",
+    "InvalidOperatorError" : "Vous devez choisir 1, 2, 3 ou 4",
+    "TryAgainPrompt" : "Aimerez vous essayez une autre fois? Y/N",
+    "Result" : "Le resultat est: "
+  }
+}
