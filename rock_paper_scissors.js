@@ -10,12 +10,18 @@ const GAME_VICTORS = {
   spock : ['scissors', 'rock']
 };
 
-const ResultsEnum = {PLAYER:0, COMPUTER:1, TIE:2};
-Object.freeze(ResultsEnum);
+const ResultsEnum = {
+  PLAYER: 1,
+  COMPUTER: 2,
+  TIE: 3
+};
+
+if (Object.freeze) {
+  Object.freeze(ResultsEnum);
+}
 
 const GAMES_TO_WIN = 5;
-let playerWins = 0;
-let computerWins = 0;
+let score = {playerWins : 0, computerWins : 0};
 
 function prompt(message) {
   console.log(`=> ${message}`);
@@ -27,10 +33,10 @@ prompt(`First one to ${GAMES_TO_WIN} wins!`);
 prompt(DASHED_LINE);
 
 while (true) {
-  prompt(`Choose one: ${VALID_CHOICES.map(item => item + ` [${getFirstLetter(item)}]`).join(", ")}`);
+  prompt(`Choose one: ${VALID_CHOICES.map(item => item + ` [${getAbbreviation(item)}]`).join(", ")}`);
   let choice = readline.question();
 
-  while (!isMatch(choice)) {
+  while (!isValidChoice(choice)) {
     prompt("That's not a valid choice");
     choice = readline.question();
   }
@@ -48,7 +54,7 @@ while (true) {
   displayWinner(result);
   calculateScore(result);
 
-  if (playerWins >= GAMES_TO_WIN || computerWins >= GAMES_TO_WIN) {
+  if (score.playerWins >= GAMES_TO_WIN || score.computerWins >= GAMES_TO_WIN) {
 
     displayBestOfFiveWinner();
 
@@ -68,26 +74,26 @@ while (true) {
   }
 }
 
-function isMatch(choice) {
+function isValidChoice(choice) {
   if (VALID_CHOICES.includes(choice) ||
-    matchesFirstLetter(choice)) {
+    matchesAbbreviation(choice)) {
     return true;
   }
   return false;
 }
 
-function getFirstLetter(string) {
+function getAbbreviation(string) {
   let substringLength = 1;
   if (string[0] === 's') substringLength = 2;
   return string.substring(0, substringLength);
 }
 
-function matchesFirstLetter(string) {
-  return VALID_CHOICES.map(item => getFirstLetter(item)).includes(string);
+function matchesAbbreviation(string) {
+  return VALID_CHOICES.map(item => getAbbreviation(item)).includes(string);
 }
 
 function getFullWordFromLetter(letter) {
-  let index = VALID_CHOICES.map(item => getFirstLetter(item)).indexOf(letter);
+  let index = VALID_CHOICES.map(item => getAbbreviation(item)).indexOf(letter);
   return VALID_CHOICES[index];
 }
 
@@ -113,24 +119,24 @@ function displayWinner(result) {
 
 function calculateScore(result) {
   if (result === ResultsEnum.PLAYER) {
-    playerWins++;
+    score.playerWins++;
   } else if (result === ResultsEnum.COMPUTER) {
-    computerWins++;
+    score.computerWins++;
   }
 }
 
 function displayBestOfFiveWinner() {
   prompt(DASHED_LINE);
-  if (playerWins >= GAMES_TO_WIN) {
+  if (score.playerWins >= GAMES_TO_WIN) {
     prompt("CONGRATULATIONS! You beat the computer!");
-  } else if (computerWins >= GAMES_TO_WIN) {
+  } else if (score.computerWins >= GAMES_TO_WIN) {
     prompt("OH NO! You lost to the computer!");
   }
-  prompt(`Final Score: Player:${playerWins} Computer:${computerWins}`);
+  prompt(`Final Score: Player:${score.playerWins} Computer:${score.computerWins}`);
   prompt(DASHED_LINE);
 }
 
 function resetScore() {
-  playerWins = 0;
-  computerWins = 0;
+  score.playerWins = 0;
+  score.computerWins = 0;
 }
