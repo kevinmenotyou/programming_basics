@@ -19,13 +19,13 @@ let utfValues = {
 
 // 8-4-4-12
 
-let uuid = "";
-for (let num = 0; num < 28; num++) {
-  uuid += String.fromCharCode(utfValues[Math.floor(Math.random() * 16)]);
-}
-console.log(uuid);
-console.log(formatUUID(uuid));
 
-function formatUUID(uuid) {
+console.log(generateUUID());
+
+function generateUUID() {
+  let uuid = "";
+  for (let num = 0; num < 28; num++) {
+    uuid += String.fromCharCode(utfValues[Math.floor(Math.random() * 16)]);
+  }
   return uuid.slice(0, 8) + "-" + uuid.slice(8, 12) + "-" + uuid.slice(12, 16) + "-" + uuid.slice(17);
 }
