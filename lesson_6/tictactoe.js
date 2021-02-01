@@ -9,21 +9,49 @@ let WINNING_LINES = [
   [1, 5, 9], [3, 5, 7]             // diagonals
 ];
 
+let TURN_ORDER_OPTIONS = ['player', 'computer', 'choose'];
+
 let readline = require("readline-sync");
 
 while (true) {
   let score = { player: 0, computer: 0 };
 
+  prompt("Who should go first? player/computer/choose");
+  let turnOrderChoice = readline.question();
+  while (!TURN_ORDER_OPTIONS.includes(turnOrderChoice)) {
+    prompt("Invalid option, choose between player/computer/choose");
+    turnOrderChoice = readline.question();
+  }
+
   while (true) {
     let board = initializeBoard();
+
+    let whoGoesFirst;
+    if (turnOrderChoice === 'choose') {
+      prompt("Who should go first this game? player/computer");
+      whoGoesFirst = readline.question();
+      while ((whoGoesFirst !== 'player' && whoGoesFirst !== 'computer')) {
+        prompt("Invalid option, choose between player/computer");
+        whoGoesFirst = readline.question();
+      }
+    } else {
+      whoGoesFirst = turnOrderChoice;
+    }
 
     while (true) {
       displayBoard(board);
 
-      playerChoosesSquare(board);
+      console.log(whoGoesFirst);
+
+      if (whoGoesFirst === 'player') playerChoosesSquare(board);
+      else if (whoGoesFirst === 'computer') {
+        computerChoosesSquare(board);
+        displayBoard(board);
+      }
       if (someoneWon(board) || boardFull(board)) break;
 
-      computerChoosesSquare(board);
+      if (whoGoesFirst === 'player') computerChoosesSquare(board);
+      else if (whoGoesFirst === 'computer') playerChoosesSquare(board);
       if (someoneWon(board) || boardFull(board)) break;
     }
 
@@ -71,11 +99,11 @@ function playerChoosesSquare(board) {
 
 function computerChoosesSquare(board) {
 
-  let victorySquare = checkOpportunity(board);
+  let opportuneSquare = checkOpportunity(board);
   let threatenedSquare = checkThreat(board);
 
-  if (victorySquare) {
-    board[victorySquare] = COMPUTER_MARKER;
+  if (opportuneSquare) {
+    board[opportuneSquare] = COMPUTER_MARKER;
   } else if (threatenedSquare) {
     board[threatenedSquare] = COMPUTER_MARKER;
   } else if (emptySquares(board).includes(5)) {
@@ -165,7 +193,7 @@ function someoneWon(board) {
 }
 
 function displayBoard(board) {
-  //console.clear();
+  console.clear();
   console.log(`You are ${HUMAN_MARKER}. Computer is ${COMPUTER_MARKER}`);
   console.log('');
   console.log('     |     |');
