@@ -26,32 +26,24 @@ while (true) {
   while (true) {
     let board = initializeBoard();
 
-    let whoGoesFirst;
+    console.log(`${emptySquares(board)[5]}`);
+
+    let currentPlayer;
     if (turnOrderChoice === 'choose') {
       prompt("Who should go first this game? player/computer");
-      whoGoesFirst = readline.question();
-      while ((whoGoesFirst !== 'player' && whoGoesFirst !== 'computer')) {
+      currentPlayer = readline.question();
+      while ((currentPlayer !== 'player' && currentPlayer !== 'computer')) {
         prompt("Invalid option, choose between player/computer");
-        whoGoesFirst = readline.question();
+        currentPlayer = readline.question();
       }
     } else {
-      whoGoesFirst = turnOrderChoice;
+      currentPlayer = turnOrderChoice;
     }
 
     while (true) {
       displayBoard(board);
-
-      console.log(whoGoesFirst);
-
-      if (whoGoesFirst === 'player') playerChoosesSquare(board);
-      else if (whoGoesFirst === 'computer') {
-        computerChoosesSquare(board);
-        displayBoard(board);
-      }
-      if (someoneWon(board) || boardFull(board)) break;
-
-      if (whoGoesFirst === 'player') computerChoosesSquare(board);
-      else if (whoGoesFirst === 'computer') playerChoosesSquare(board);
+      chooseSquare(board, currentPlayer);
+      currentPlayer = alternatePlayer(currentPlayer);
       if (someoneWon(board) || boardFull(board)) break;
     }
 
@@ -79,10 +71,34 @@ while (true) {
 
   prompt('Play again? (y or n)');
   let answer = readline.question().toLowerCase()[0];
-  if (answer !== 'y') break;
+  let validInputs = ['y','Y','n','N'];
+  while (!validInputs.includes(answer) || answer.length > 1) {
+    prompt("Invalid input! Please choose y or n.");
+    answer = readline.question().toLowerCase()[0];
+  }
+
+  if (answer === 'n' || answer === 'N') break;
+  else if (answer === 'y' || answer === 'Y') continue;
+
 }
 
 prompt('Thanks for playing Tic Tac Toe!');
+
+function chooseSquare(board, player) {
+  if (player === TURN_ORDER_OPTIONS[0]) {
+    playerChoosesSquare(board);
+  } else {
+    computerChoosesSquare(board);
+  }
+}
+
+function alternatePlayer(player) {
+  if (player === TURN_ORDER_OPTIONS[0]) {
+    return TURN_ORDER_OPTIONS[1];
+  } else {
+    return TURN_ORDER_OPTIONS[0];
+  }
+}
 
 function playerChoosesSquare(board) {
   let square;
@@ -106,7 +122,7 @@ function computerChoosesSquare(board) {
     board[opportuneSquare] = COMPUTER_MARKER;
   } else if (threatenedSquare) {
     board[threatenedSquare] = COMPUTER_MARKER;
-  } else if (emptySquares(board).includes(5)) {
+  } else if (board[5] === INITIAL_MARKER) {
     board[5] = COMPUTER_MARKER;
   } else {
     let randomIndex = Math.floor(Math.random() * emptySquares.length);
