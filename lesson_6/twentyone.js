@@ -17,22 +17,21 @@ while (true) {
   let playerHand = dealTwoCards(deck);
   let computerHand = dealTwoCards(deck);
 
-  let playerBusted = false;
-
   displayHiddenHand("Computer", computerHand);
   displayHand("Player", playerHand);
 
+  let playerBust = false;
   let hitOrStay;
   do {
-    prompt("Would you like to 'hit' or 'stay'?");
+    prompt("Would you like to 'hit' or 'stay'? h/s");
     hitOrStay = readLine.question();
 
     while (hitOrStay !== "hit" && hitOrStay !== "stay") {
-      prompt("Invalid response, please choose either 'hit' or 'stay'.");
+      prompt("Invalid response, please choose either hit 'h' or stay 's'. ");
       hitOrStay = readLine.question();
     }
 
-    if (hitOrStay === "hit") {
+    if (hitOrStay === "h" || hitOrStay === "hit") {
       playerHand.push(dealCard(deck));
       console.clear();
       displayHiddenHand("Computer", computerHand);
@@ -41,27 +40,24 @@ while (true) {
 
     let total = getHandTotal(playerHand);
     if (isBust(total)) {
-      playerBusted = true;
+      playerBust = true;
       prompt(`You went bust! Your total was: ${total}.`);
       break;
     }
-  } while (hitOrStay !== "stay");
+  } while (hitOrStay !== "s" && hitOrStay !== "stay");
 
-  let computerBusted = false;
-  while (true) {
-    if (getHandTotal(computerHand) < 17) {
-      computerHand.push(dealCard(deck));
-    } else break;
-
-    let total = getHandTotal(computerHand);
-    if (isBust(total)) {
-      computerBusted = true;
-      prompt(`Computer went bust! Their total was: ${total}.`);
-      break;
+  if (!playerBust) {
+    while (true) {
+      if (getHandTotal(computerHand) < 17) {
+        computerHand.push(dealCard(deck));
+      } else break;
     }
   }
 
-  displayResult(playerHand, computerHand, playerBusted, computerBusted);
+  console.log("----------------------------");
+  displayHand("Player", playerHand);
+  displayHand("Computer", computerHand);
+  displayResult(playerHand, computerHand);
 
   console.log("----------------------------");
   prompt("Would you like to play again? y/n");
@@ -78,31 +74,37 @@ while (true) {
   }
 }
 
-function displayResult(playerHand, computerHand, playerBust, computerBust) {
-  console.log("----------------------------");
-  displayHand("Player", playerHand);
-  displayHand("Computer", computerHand);
-
+function displayResult(playerHand, computerHand) {
   let playerTotal = getHandTotal(playerHand);
   let computerTotal = getHandTotal(computerHand);
 
-  prompt(`Player's total was: ${playerTotal}`);
-  prompt(`Computer's total was: ${computerTotal}`);
+  let winner = getWinner(playerTotal, computerTotal);
 
-  prompt(calculateWinner(playerTotal, computerTotal, playerBust, computerBust));
+  switch (winner) {
+    case "PLAYER_BUST": prompt(`Player went bust with ${playerTotal}! Computer wins with ${computerTotal}!`);
+      break;
+    case "COMPUTER": prompt(`Computer wins with ${computerTotal} against player's ${playerTotal}!`);
+      break;
+    case "COMPUTER_BUST": prompt(`Computer went bust with ${computerTotal}! Player wins with ${playerTotal}!`);
+      break;
+    case "PLAYER": prompt(`Player wins with ${playerTotal} against computer's ${computerTotal}!`);
+      break;
+    case "TIE": prompt(`It's a tie with both player and computer getting ${playerTotal}!`);
+      break;
+  }
 }
 
-function calculateWinner(playerTotal, computerTotal, playerBust, computerBust) {
-  if (playerBust) {
-    return "Computer won!";
-  } else if (computerBust) {
-    return "Player won!";
+function getWinner(playerTotal, computerTotal) {
+  if (isBust(playerTotal)) {
+    return "PLAYER_BUST";
+  } else if (isBust(computerTotal)) {
+    return "COMPUTER_BUST";
   } else if (playerTotal < computerTotal) {
-    return "Computer won!";
+    return "COMPUTER";
   } else if (playerTotal > computerTotal) {
-    return "Player won!";
+    return "PLAYER";
   } else {
-    return "It's a tie!";
+    return "TIE";
   }
 }
 
