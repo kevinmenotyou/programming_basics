@@ -2,82 +2,120 @@ const FACE_CARDS = ["King", "Queen", "Jack"];
 const FACE_CARD_VALUE = 10;
 const ACE_HIGH = 11;
 const ACE_LOW = 1;
-
+const DEALER_LIMIT = 17;
+const MAX_TOTAL = 21;
+const NEW_LINE = "----------------------------";
+const NUMBER_OF_GAMES = 5;
 const SUITS = ["Hearts", "Spades", "Clubs", "Diamonds"];
-let MAX_TOTAL = 21;
 
 let readLine = require("readline-sync");
 
 while (true) {
+
+  let gameCounter = 1;
+  let score = { player: 0, computer: 0};
+
   console.clear();
+  console.log(NEW_LINE);
   prompt('Welcome to Twenty-One!');
+  prompt('Get as close as possible to twenty-one without going over!');
+  prompt(`Best of ${NUMBER_OF_GAMES} wins!`);
+  console.log(NEW_LINE);
+  waitForKey();
 
-  let deck = initializeDeck();
+  while (true) {
 
-  let playerHand = dealTwoCards(deck);
-  let computerHand = dealTwoCards(deck);
+    let deck = initializeDeck();
 
-  displayHiddenHand("Computer", computerHand);
-  displayHand("Player", playerHand);
+    let playerTotal = 0;
+    let computerTotal = 0;
 
-  let playerBust = false;
-  let hitOrStay;
-  do {
-    prompt("Would you like to 'hit' or 'stay'? h/s");
-    hitOrStay = readLine.question();
+    let playerHand = dealTwoCards(deck);
+    let computerHand = dealTwoCards(deck);
 
-    while (hitOrStay !== "hit" && hitOrStay !== "stay") {
-      prompt("Invalid response, please choose either hit 'h' or stay 's'. ");
-      hitOrStay = readLine.question();
+    let playerBust = false;
+
+    console.clear();
+    console.log(NEW_LINE);
+    prompt(`New round started! Game #${gameCounter}!`);
+    displayPlayerRound(computerHand, playerHand);
+
+    let hitOrStay;
+    do {
+      prompt("Would you like to hit or stay? h/s");
+      hitOrStay = readLine.question().trim();
+
+      while (hitOrStay !== "h" && hitOrStay !== "H" && hitOrStay.toLowerCase() !== "hit" &&
+          hitOrStay !== "s" && hitOrStay !== "S" && hitOrStay.toLowerCase() !== "stay") {
+        prompt("Invalid response, please choose either hit 'h' or stay 's'. ");
+        hitOrStay = readLine.question().trim();
+      }
+
+      if (hitOrStay[0] === "h" || hitOrStay[0] === "H") {
+        playerHand.push(dealCard(deck));
+        console.clear();
+        displayPlayerRound(computerHand, playerHand);
+      }
+
+      playerTotal = getHandTotal(playerHand);
+      if (isBust(playerTotal)) {
+        playerBust = true;
+        break;
+      }
+    } while (hitOrStay[0] !== "s" && hitOrStay[0] !== "S");
+
+    computerTotal = getHandTotal(computerHand);
+    if (!playerBust) {
+      while (computerTotal < DEALER_LIMIT) {
+        computerHand.push(dealCard(deck));
+        computerTotal = getHandTotal(computerHand);
+      }
     }
 
-    if (hitOrStay === "h" || hitOrStay === "hit") {
-      playerHand.push(dealCard(deck));
-      console.clear();
-      displayHiddenHand("Computer", computerHand);
-      displayHand("Player", playerHand);
-    }
+    console.clear();
+    console.log(NEW_LINE);
+    displayHand("Player", playerHand);
+    displayHand("Computer", computerHand);
+    displayResult(playerTotal, computerTotal, score);
+    console.log(NEW_LINE);
 
-    let total = getHandTotal(playerHand);
-    if (isBust(total)) {
-      playerBust = true;
-      prompt(`You went bust! Your total was: ${total}.`);
+    waitForKey();
+
+    gameCounter++;
+    if (gameCounter > NUMBER_OF_GAMES) {
+      displayGrandWinner(score);
       break;
     }
-  } while (hitOrStay !== "s" && hitOrStay !== "stay");
-
-  if (!playerBust) {
-    while (true) {
-      if (getHandTotal(computerHand) < 17) {
-        computerHand.push(dealCard(deck));
-      } else break;
-    }
   }
-
-  console.log("----------------------------");
-  displayHand("Player", playerHand);
-  displayHand("Computer", computerHand);
-  displayResult(playerHand, computerHand);
-
-  console.log("----------------------------");
-  prompt("Would you like to play again? y/n");
-  let playAgain = readLine.question();
-
-  while (playAgain !== "y" && playAgain !== "n") {
-    prompt("Invalid response, please choose either 'y' or 'n'.");
-    playAgain = readLine.question();
-  }
-
-  if (playAgain === "n") {
+  if (!playAgain()) {
     prompt("Thanks for playing Twenty-One!");
     break;
   }
 }
 
-function displayResult(playerHand, computerHand) {
-  let playerTotal = getHandTotal(playerHand);
-  let computerTotal = getHandTotal(computerHand);
+function waitForKey() {
+  prompt("Press the 'enter' or 'return' key to continue.");
+  readLine.question();
+}
 
+function playAgain() {
+  prompt("Would you like to play again? y/n");
+  let playAgain = readLine.question().trim();
+
+  while (playAgain !== "y" && playAgain !== "Y" && playAgain.toLowerCase() !== "yes" &&
+      playAgain !== "n" && playAgain !== "N" && playAgain.toLowerCase() !== "no") {
+    prompt("Invalid response, please choose either 'y' or 'n'.");
+    playAgain = readLine.question().trim();
+  }
+
+  if (playAgain[0] === "n" || playAgain[0] === "N") {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+function displayResult(playerTotal, computerTotal, score) {
   let winner = getWinner(playerTotal, computerTotal);
 
   switch (winner) {
@@ -91,6 +129,16 @@ function displayResult(playerHand, computerHand) {
       break;
     case "TIE": prompt(`It's a tie with both player and computer getting ${playerTotal}!`);
       break;
+  }
+
+  incrementScore(score, winner);
+}
+
+function incrementScore(score, winner) {
+  if (winner === "PLAYER_BUST" || winner === "COMPUTER") {
+    score.computer++;
+  } else if (winner === "COMPUTER_BUST" || winner === "PLAYER") {
+    score.player++;
   }
 }
 
@@ -106,6 +154,40 @@ function getWinner(playerTotal, computerTotal) {
   } else {
     return "TIE";
   }
+}
+
+function displayGrandWinner(score) {
+  console.clear();
+  console.log(NEW_LINE);
+  prompt(`Player won ${score.player} game(s) out of ${NUMBER_OF_GAMES}.`);
+  prompt(`Computer won ${score.computer} game(s) out of ${NUMBER_OF_GAMES}.`);
+
+  let grandWinner = getGrandWinner(score);
+  if (grandWinner === "PLAYER") {
+    prompt("Player wins!");
+  } else if (grandWinner === "COMPUTER") {
+    prompt("Computer wins!");
+  } else if (grandWinner === "TIE") {
+    prompt("It's a tie!");
+  }
+  console.log(NEW_LINE);
+}
+
+function getGrandWinner(score) {
+  if (score.player > score.computer) {
+    return "PLAYER";
+  } else if (score.computer > score.player) {
+    return "COMPUTER";
+  } else {
+    return "TIE";
+  }
+}
+
+function displayPlayerRound(computerHand, playerHand) {
+  console.log(NEW_LINE);
+  displayHiddenHand("Computer", computerHand);
+  displayHand("Player", playerHand);
+  console.log(NEW_LINE);
 }
 
 function displayHand(user, hand) {
